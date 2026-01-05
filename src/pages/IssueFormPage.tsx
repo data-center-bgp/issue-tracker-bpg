@@ -53,7 +53,6 @@ export function IssueFormPage() {
         .from("issues")
         .select("*")
         .eq("id", issueId)
-        .is("deleted_at", null)
         .single();
 
       if (error) {

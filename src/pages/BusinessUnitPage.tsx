@@ -66,7 +66,6 @@ export function BusinessUnitPage() {
         `
         )
         .eq("business_unit_id", businessUnitId)
-        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (issuesError) {

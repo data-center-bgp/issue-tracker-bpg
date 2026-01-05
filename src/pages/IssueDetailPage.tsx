@@ -6,7 +6,6 @@ interface Issue {
   id: number;
   created_at: string;
   updated_at: string;
-  deleted_at: string | null;
   business_unit_id: number;
   kpi_id: number | null;
   problem: string;
@@ -48,7 +47,6 @@ export function IssueDetailPage() {
         .from("issues")
         .select("*")
         .eq("id", issueId)
-        .is("deleted_at", null)
         .single();
 
       if (issueError) throw issueError;
