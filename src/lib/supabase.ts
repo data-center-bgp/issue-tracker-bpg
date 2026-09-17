@@ -9,6 +9,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   db: {
-    schema: "issue_tracker_bpg",
+    schema: "issue_tracker",
   },
 });
