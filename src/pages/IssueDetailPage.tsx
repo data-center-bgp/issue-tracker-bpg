@@ -1,6 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { Panel } from "../components/ui/Panel";
+import { Button } from "../components/ui/Button";
+import { ErrorBanner } from "../components/ui/ErrorBanner";
+import { FullScreenLoader } from "../components/ui/Spinner";
+import { StatusStamp } from "../components/ui/StatusStamp";
+import { ProgressGauge } from "../components/ui/ProgressGauge";
+import { BackLink } from "../components/ui/BackLink";
 
 interface Issue {
   id: number;
@@ -37,6 +44,9 @@ export function IssueDetailPage() {
   const [kpi, setKpi] = useState<KPI | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const fetchIssueDetails = useCallback(async () => {
     try {
@@ -87,6 +97,23 @@ export function IssueDetailPage() {
     }
   }, [issueId, fetchIssueDetails]);
 
+  const handleDelete = async () => {
+    if (!issue) return;
+    setDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const { error } = await supabase.from("issues").delete().eq("id", issue.id);
+      if (error) throw error;
+      navigate(`/business-unit/${issue.business_unit_id}`);
+    } catch (error: unknown) {
+      setDeleteError(
+        error instanceof Error ? error.message : "Failed to delete issue"
+      );
+      setDeleting(false);
+    }
+  };
+
   const formatBusinessUnitName = (name: string) => {
     return name
       .split("_")
@@ -112,98 +139,78 @@ export function IssueDetailPage() {
     });
   };
 
-  const getStatusColor = () => {
-    if (issue?.progress === 100) {
-      return "bg-green-500/20 text-green-400 border-green-500/50";
-    }
-    return "bg-yellow-500/20 text-yellow-400 border-yellow-500/50";
-  };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-linear-to-br from-navy-950 via-navy-900 to-navy-800 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400"></div>
-      </div>
-    );
+    return <FullScreenLoader />;
   }
 
   if (error || !issue || !businessUnit) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-navy-950 via-navy-900 to-navy-800 p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-6 py-4 rounded-lg">
-            {error || "Issue not found"}
-          </div>
-          <button
+      <div className="min-h-screen bg-ledger p-8">
+        <div className="max-w-4xl mx-auto">
+          <ErrorBanner message={error || "Issue not found"} />
+          <Button
+            variant="primary"
             onClick={() => navigate(-1)}
-            className="mt-4 px-6 py-2 bg-yellow-400 text-navy-900 font-semibold rounded-lg hover:bg-yellow-500 transition-colors"
+            className="mt-4"
           >
             Go Back
-          </button>
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-navy-950 via-navy-900 to-navy-800 p-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-ledger p-8">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <button
-            onClick={() => navigate(`/business-unit/${issue.business_unit_id}`)}
-            className="flex items-center text-yellow-400 hover:text-yellow-300 transition-colors mb-3"
-          >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+          <BackLink onClick={() => navigate(`/business-unit/${issue.business_unit_id}`)}>
             Back to {formatBusinessUnitName(businessUnit.business_unit)}
-          </button>
+          </BackLink>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold text-white">Issue Details</h1>
+            <h1 className="font-display text-3xl font-semibold text-ink-50">
+              Issue Details
+            </h1>
           </div>
-          <p className="text-navy-300">Issue #{issue.id}</p>
+          <p className="text-ink-400 font-mono text-sm">
+            #{issue.id.toString().padStart(4, "0")}
+          </p>
         </div>
 
         {/* Main Content */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Business Unit & KPI Info */}
-          <div className="bg-navy-900/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-navy-700/50 p-6">
+          <Panel className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <p className="text-navy-400 text-sm mb-1">Business Unit</p>
-                <p className="text-white font-medium text-lg">
+                <p className="text-ink-400 font-mono text-xs uppercase tracking-widest mb-1">
+                  Business Unit
+                </p>
+                <p className="text-ink-50 font-medium text-lg">
                   {formatBusinessUnitName(businessUnit.business_unit)}
                 </p>
               </div>
               <div>
-                <p className="text-navy-400 text-sm mb-1">KPI</p>
-                <p className="text-white font-medium text-lg">
+                <p className="text-ink-400 font-mono text-xs uppercase tracking-widest mb-1">
+                  KPI
+                </p>
+                <p className="text-ink-50 font-medium text-lg">
                   {kpi ? (
                     kpi.kpi_type
                   ) : (
-                    <em className="text-navy-400">No KPI assigned</em>
+                    <em className="text-ink-400 not-italic">No KPI assigned</em>
                   )}
                 </p>
               </div>
             </div>
-          </div>
+          </Panel>
 
           {/* Problem Section */}
-          <div className="bg-navy-900/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-navy-700/50 p-6">
-            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <Panel accent="rust" className="p-6">
+            <h2 className="font-display text-lg font-semibold text-ink-50 mb-3 flex items-center gap-2">
               <svg
-                className="w-6 h-6 text-red-400"
+                className="w-5 h-5 text-rust-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -217,18 +224,18 @@ export function IssueDetailPage() {
               </svg>
               Problem
             </h2>
-            <p className="text-navy-200 whitespace-pre-wrap">
+            <p className="text-ink-200 whitespace-pre-wrap">
               {issue.problem || (
-                <em className="text-navy-400">No problem description</em>
+                <em className="text-ink-400 not-italic">No problem description</em>
               )}
             </p>
-          </div>
+          </Panel>
 
           {/* Solution Section */}
-          <div className="bg-navy-900/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-navy-700/50 p-6">
-            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <Panel accent="moss" className="p-6">
+            <h2 className="font-display text-lg font-semibold text-ink-50 mb-3 flex items-center gap-2">
               <svg
-                className="w-6 h-6 text-green-400"
+                className="w-5 h-5 text-moss-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -242,18 +249,18 @@ export function IssueDetailPage() {
               </svg>
               Solution
             </h2>
-            <p className="text-navy-200 whitespace-pre-wrap">
+            <p className="text-ink-200 whitespace-pre-wrap">
               {issue.solution || (
-                <em className="text-navy-400">No solution provided</em>
+                <em className="text-ink-400 not-italic">No solution provided</em>
               )}
             </p>
-          </div>
+          </Panel>
 
           {/* To Do Section */}
-          <div className="bg-navy-900/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-navy-700/50 p-6">
-            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <Panel accent="gold" className="p-6">
+            <h2 className="font-display text-lg font-semibold text-ink-50 mb-3 flex items-center gap-2">
               <svg
-                className="w-6 h-6 text-blue-400"
+                className="w-5 h-5 text-gold-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -267,18 +274,16 @@ export function IssueDetailPage() {
               </svg>
               To Do
             </h2>
-            <p className="text-navy-200 whitespace-pre-wrap">
-              {issue.to_do || (
-                <em className="text-navy-400">No action items</em>
-              )}
+            <p className="text-ink-200 whitespace-pre-wrap">
+              {issue.to_do || <em className="text-ink-400 not-italic">No action items</em>}
             </p>
-          </div>
+          </Panel>
 
           {/* To Do Tools Section */}
-          <div className="bg-navy-900/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-navy-700/50 p-6">
-            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <Panel className="p-6">
+            <h2 className="font-display text-lg font-semibold text-ink-50 mb-3 flex items-center gap-2">
               <svg
-                className="w-6 h-6 text-yellow-400"
+                className="w-5 h-5 text-ink-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -298,95 +303,128 @@ export function IssueDetailPage() {
               </svg>
               Tools Required
             </h2>
-            <p className="text-navy-200 whitespace-pre-wrap">
+            <p className="text-ink-200 whitespace-pre-wrap">
               {issue.to_do_tools || (
-                <em className="text-navy-400">No tools specified</em>
+                <em className="text-ink-400 not-italic">No tools specified</em>
               )}
             </p>
-          </div>
+          </Panel>
 
           {/* Status & Progress */}
-          <div className="bg-navy-900/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-navy-700/50 p-6">
+          <Panel className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-navy-400 text-sm mb-2">Status</p>
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium border inline-block ${getStatusColor()}`}
-                >
-                  {issue.progress === 100 ? "COMPLETED" : "ON PROGRESS"}
-                </span>
+                <p className="text-ink-400 font-mono text-xs uppercase tracking-widest mb-2">
+                  Status
+                </p>
+                <StatusStamp completed={issue.progress === 100} />
               </div>
               <div className="text-right">
-                <p className="text-navy-400 text-sm mb-2">Progress</p>
-                <span className="text-white font-bold text-2xl">
+                <p className="text-ink-400 font-mono text-xs uppercase tracking-widest mb-2">
+                  Progress
+                </p>
+                <span className="text-ink-50 font-mono font-bold text-2xl">
                   {issue.progress}%
                 </span>
               </div>
             </div>
-            <div className="w-full bg-navy-800 rounded-full h-3">
-              <div
-                className={`h-3 rounded-full transition-all duration-300 ${
-                  issue.progress === 100 ? "bg-green-400" : "bg-yellow-400"
-                }`}
-                style={{ width: `${issue.progress}%` }}
-              ></div>
-            </div>
-          </div>
+            <ProgressGauge progress={issue.progress} />
+          </Panel>
 
           {/* Timeline */}
-          <div className="bg-navy-900/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-navy-700/50 p-6">
-            <h2 className="text-xl font-bold text-white mb-4">Timeline</h2>
+          <Panel className="p-6">
+            <h2 className="font-display text-lg font-semibold text-ink-50 mb-4">
+              Timeline
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-navy-400 text-sm">Created At</p>
-                <p className="text-white font-medium">
+                <p className="text-ink-400 font-mono text-xs uppercase tracking-widest">
+                  Created At
+                </p>
+                <p className="text-ink-50 font-medium">
                   {formatDateTime(issue.created_at)}
                 </p>
               </div>
               <div>
-                <p className="text-navy-400 text-sm">Open Date</p>
-                <p className="text-white font-medium">
+                <p className="text-ink-400 font-mono text-xs uppercase tracking-widest">
+                  Open Date
+                </p>
+                <p className="text-ink-50 font-medium">
                   {formatDate(issue.open_date)}
                 </p>
               </div>
               <div>
-                <p className="text-navy-400 text-sm">Due Date</p>
-                <p className="text-white font-medium">
+                <p className="text-ink-400 font-mono text-xs uppercase tracking-widest">
+                  Due Date
+                </p>
+                <p className="text-ink-50 font-medium">
                   {formatDate(issue.due_date)}
                 </p>
               </div>
               <div>
-                <p className="text-navy-400 text-sm">Actual Close Date</p>
-                <p className="text-white font-medium">
+                <p className="text-ink-400 font-mono text-xs uppercase tracking-widest">
+                  Actual Close Date
+                </p>
+                <p className="text-ink-50 font-medium">
                   {issue.actual_close_date ? (
                     formatDate(issue.actual_close_date)
                   ) : (
-                    <em className="text-navy-400">Not closed yet</em>
+                    <em className="text-ink-400 not-italic">Not closed yet</em>
                   )}
                 </p>
               </div>
               <div>
-                <p className="text-navy-400 text-sm">Last Updated</p>
-                <p className="text-white font-medium">
+                <p className="text-ink-400 font-mono text-xs uppercase tracking-widest">
+                  Last Updated
+                </p>
+                <p className="text-ink-50 font-medium">
                   {issue.updated_at ? (
                     formatDateTime(issue.updated_at)
                   ) : (
-                    <em className="text-navy-400">No updates</em>
+                    <em className="text-ink-400 not-italic">No updates</em>
                   )}
                 </p>
               </div>
             </div>
-          </div>
+          </Panel>
         </div>
 
-        {/* Edit Button */}
+        {/* Edit / Delete */}
         <div className="mt-6">
-          <button
-            onClick={() => navigate(`/issue/${issue.id}/edit`)}
-            className="px-6 py-3 bg-yellow-400 text-navy-900 font-semibold rounded-lg hover:bg-yellow-500 transition-colors shadow-lg shadow-yellow-400/20"
-          >
-            Edit Issue
-          </button>
+          {deleteError && (
+            <div className="mb-4">
+              <ErrorBanner message={deleteError} />
+            </div>
+          )}
+          {confirmingDelete ? (
+            <div className="flex items-center gap-4 flex-wrap">
+              <span className="text-ink-200 font-mono text-sm">
+                Delete this issue? This cannot be undone.
+              </span>
+              <Button variant="danger" onClick={handleDelete} disabled={deleting}>
+                {deleting ? "Deleting..." : "Confirm Delete"}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => setConfirmingDelete(false)}
+                disabled={deleting}
+              >
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-4">
+              <Button onClick={() => navigate(`/issue/${issue.id}/edit`)}>
+                Edit Issue
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => setConfirmingDelete(true)}
+              >
+                Delete Issue
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,6 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { Panel } from "../components/ui/Panel";
+import { Button } from "../components/ui/Button";
+import { ErrorBanner } from "../components/ui/ErrorBanner";
+import { FullScreenLoader } from "../components/ui/Spinner";
+import { StatusStamp } from "../components/ui/StatusStamp";
+import { ProgressGauge } from "../components/ui/ProgressGauge";
+import { BackLink } from "../components/ui/BackLink";
 
 interface Issue {
   id: number;
@@ -52,12 +59,12 @@ export function BusinessUnitPage() {
         .from("issues")
         .select(
           `
-          id, 
-          problem, 
-          progress, 
-          status, 
-          open_date, 
-          due_date, 
+          id,
+          problem,
+          progress,
+          status,
+          open_date,
+          due_date,
           created_at,
           kpi_id,
           kpis (
@@ -110,13 +117,6 @@ export function BusinessUnitPage() {
     });
   };
 
-  const getStatusColor = (status: string) => {
-    if (status === "completed") {
-      return "bg-green-500/20 text-green-400 border-green-500/50";
-    }
-    return "bg-yellow-500/20 text-yellow-400 border-yellow-500/50";
-  };
-
   const handleIssueClick = (issueId: number) => {
     navigate(`/issue/${issueId}`);
   };
@@ -133,167 +133,104 @@ export function BusinessUnitPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-linear-to-br from-navy-950 via-navy-900 to-navy-800 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400"></div>
-      </div>
-    );
+    return <FullScreenLoader />;
   }
 
   if (error || !businessUnit) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-navy-950 via-navy-900 to-navy-800 p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-6 py-4 rounded-lg">
-            {error || "Business unit not found"}
-          </div>
-          <button
+      <div className="min-h-screen bg-ledger p-8">
+        <div className="max-w-4xl mx-auto">
+          <ErrorBanner message={error || "Business unit not found"} />
+          <Button
+            variant="primary"
             onClick={() => navigate("/dashboard")}
-            className="mt-4 px-6 py-2 bg-yellow-400 text-navy-900 font-semibold rounded-lg hover:bg-yellow-500 transition-colors"
+            className="mt-4"
           >
             Back to Dashboard
-          </button>
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-navy-950 via-navy-900 to-navy-800 p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-ledger p-8">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="flex items-center text-yellow-400 hover:text-yellow-300 transition-colors mb-3"
-          >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+          <BackLink onClick={() => navigate("/dashboard")}>
             Back to Dashboard
-          </button>
-          <h1 className="text-3xl font-bold text-white mb-2">
+          </BackLink>
+          <h1 className="font-display text-3xl font-semibold text-ink-50 mb-2">
             {formatBusinessUnitName(businessUnit.business_unit)}
           </h1>
-          <p className="text-navy-300">
+          <p className="text-ink-300 font-mono text-sm">
             {issues.length} {issues.length === 1 ? "issue" : "issues"} tracked
           </p>
         </div>
 
         {/* Add Issue Button */}
         <div className="mb-6">
-          <button
+          <Button
             onClick={() =>
               navigate(`/business-unit/${businessUnitId}/new-issue`)
             }
-            className="px-6 py-3 bg-yellow-400 text-navy-900 font-semibold rounded-lg hover:bg-yellow-500 transition-colors shadow-lg shadow-yellow-400/20"
           >
             + Add New Issue
-          </button>
+          </Button>
         </div>
 
         {/* Issues List */}
         <div className="mb-4">
-          <h2 className="text-2xl font-bold text-white mb-4">Issues</h2>
+          <h2 className="font-display text-xl font-semibold text-ink-50 mb-4">
+            Issues
+          </h2>
         </div>
         {issues.length === 0 ? (
-          <div className="bg-navy-900/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-navy-700/50 p-12">
-            <p className="text-navy-300 text-center text-lg">
+          <Panel className="p-12">
+            <p className="text-ink-300 text-center text-lg">
               No issues found for this business unit.
             </p>
-          </div>
+          </Panel>
         ) : (
           <>
-            <div className="space-y-4">
+            <div className="border border-ink-700 rounded-md divide-y divide-ink-700 overflow-hidden">
               {currentIssues.map((issue) => (
                 <div
                   key={issue.id}
                   onClick={() => handleIssueClick(issue.id)}
-                  className="bg-navy-900/50 backdrop-blur-xl rounded-xl shadow-xl border border-navy-700/50 p-6 hover:border-yellow-400/50 transition-all cursor-pointer group"
+                  className="bg-ink-900 hover:bg-ink-800 transition-colors cursor-pointer group p-6"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-semibold text-white group-hover:text-yellow-400 transition-colors">
+                        <span className="font-mono text-xs text-ink-500">
+                          #{issue.id.toString().padStart(4, "0")}
+                        </span>
+                        <h3 className="text-lg font-semibold text-ink-50 group-hover:text-gold-300 transition-colors truncate">
                           {issue.problem}
                         </h3>
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
-                            issue.status
-                          )}`}
-                        >
-                          {issue.status === "completed"
-                            ? "COMPLETED"
-                            : "ON PROGRESS"}
+                      </div>
+                      <div className="flex items-center gap-6 text-sm mb-3 flex-wrap">
+                        {issue.kpi && (
+                          <span className="text-ink-300 font-mono text-xs uppercase tracking-wide">
+                            {issue.kpi.kpi_type}
+                          </span>
+                        )}
+                        <span className="flex items-center gap-2 text-ink-400 font-mono text-xs">
+                          Due {formatDate(issue.due_date)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-6 text-sm mb-2">
-                        {issue.kpi && (
-                          <div className="flex items-center gap-2 text-navy-300">
-                            <svg
-                              className="w-4 h-4 text-yellow-400"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                              />
-                            </svg>
-                            <span className="text-navy-200">
-                              {issue.kpi.kpi_type}
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <span className="text-yellow-400 font-semibold">
-                            {issue.progress}% Complete
-                          </span>
+                      <div className="flex items-center gap-4 max-w-sm">
+                        <div className="flex-1">
+                          <ProgressGauge progress={issue.progress} />
                         </div>
-                        <div className="flex items-center gap-2 text-navy-400">
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                          </svg>
-                          <span>Due: {formatDate(issue.due_date)}</span>
-                        </div>
+                        <span className="font-mono text-xs text-ink-300 w-10 text-right">
+                          {issue.progress}%
+                        </span>
                       </div>
                     </div>
-                    <svg
-                      className="w-5 h-5 text-navy-500 group-hover:text-yellow-400 transition-colors ml-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
+                    <StatusStamp completed={issue.status === "completed"} />
                   </div>
                 </div>
               ))}
@@ -305,7 +242,7 @@ export function BusinessUnitPage() {
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 bg-navy-800 text-white rounded-lg hover:bg-navy-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-ink-900 border border-ink-700 text-ink-50 rounded-sm hover:bg-ink-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
@@ -316,10 +253,10 @@ export function BusinessUnitPage() {
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`px-4 py-2 rounded-lg transition-colors ${
+                        className={`px-4 py-2 rounded-sm transition-colors font-mono text-sm ${
                           currentPage === page
-                            ? "bg-yellow-400 text-navy-900 font-semibold"
-                            : "bg-navy-800 text-white hover:bg-navy-700"
+                            ? "bg-gold-400 text-ink-950 font-semibold"
+                            : "bg-ink-900 border border-ink-700 text-ink-50 hover:bg-ink-800"
                         }`}
                       >
                         {page}
@@ -331,7 +268,7 @@ export function BusinessUnitPage() {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-navy-800 text-white rounded-lg hover:bg-navy-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-ink-900 border border-ink-700 text-ink-50 rounded-sm hover:bg-ink-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>
@@ -339,7 +276,7 @@ export function BusinessUnitPage() {
             )}
 
             {/* Pagination Info */}
-            <div className="mt-4 text-center text-navy-400 text-sm">
+            <div className="mt-4 text-center text-ink-400 text-sm font-mono">
               Showing {startIndex + 1} to {Math.min(endIndex, issues.length)} of{" "}
               {issues.length} issues
             </div>

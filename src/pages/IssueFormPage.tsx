@@ -1,6 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { Panel } from "../components/ui/Panel";
+import { Button } from "../components/ui/Button";
+import { ErrorBanner } from "../components/ui/ErrorBanner";
+import { BackLink } from "../components/ui/BackLink";
 
 interface KPI {
   id: number;
@@ -138,44 +142,27 @@ export function IssueFormPage() {
     }
   };
 
+  const inputClasses =
+    "w-full px-4 py-3 bg-ink-800 border border-ink-700 rounded-sm text-ink-50 placeholder-ink-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent transition-all";
+  const labelClasses = "block text-sm font-medium text-ink-200 mb-2";
+
   return (
-    <div className="min-h-screen bg-linear-to-br from-navy-950 via-navy-900 to-navy-800 p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-ledger p-8">
+      <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center text-yellow-400 hover:text-yellow-300 transition-colors mb-3"
-          >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-            Back
-          </button>
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <BackLink onClick={() => navigate(-1)}>Back</BackLink>
+          <h1 className="font-display text-3xl font-semibold text-ink-50 mb-2">
             {isEditMode ? "Edit Issue" : "Add New Issue"}
           </h1>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-navy-900/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-navy-700/50 p-8">
+          <Panel className="p-8">
             {/* KPI Selection */}
             <div className="mb-6">
-              <label
-                htmlFor="kpiId"
-                className="block text-sm font-medium text-navy-200 mb-2"
-              >
+              <label htmlFor="kpiId" className={labelClasses}>
                 Related KPI *
               </label>
               <select
@@ -185,7 +172,7 @@ export function IssueFormPage() {
                   setKpiId(e.target.value ? parseInt(e.target.value) : null)
                 }
                 required
-                className="w-full px-4 py-3 bg-navy-800/50 border border-navy-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
+                className={inputClasses}
               >
                 <option value="" disabled>
                   -- Select KPI --
@@ -200,10 +187,7 @@ export function IssueFormPage() {
 
             {/* Problem */}
             <div className="mb-6">
-              <label
-                htmlFor="problem"
-                className="block text-sm font-medium text-navy-200 mb-2"
-              >
+              <label htmlFor="problem" className={labelClasses}>
                 Problem *
               </label>
               <textarea
@@ -212,17 +196,14 @@ export function IssueFormPage() {
                 onChange={(e) => setProblem(e.target.value)}
                 required
                 rows={4}
-                className="w-full px-4 py-3 bg-navy-800/50 border border-navy-600 rounded-lg text-white placeholder-navy-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all resize-none"
+                className={`${inputClasses} resize-none`}
                 placeholder="Describe the problem..."
               />
             </div>
 
             {/* Solution */}
             <div className="mb-6">
-              <label
-                htmlFor="solution"
-                className="block text-sm font-medium text-navy-200 mb-2"
-              >
+              <label htmlFor="solution" className={labelClasses}>
                 Solution *
               </label>
               <textarea
@@ -231,17 +212,14 @@ export function IssueFormPage() {
                 onChange={(e) => setSolution(e.target.value)}
                 required
                 rows={4}
-                className="w-full px-4 py-3 bg-navy-800/50 border border-navy-600 rounded-lg text-white placeholder-navy-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all resize-none"
+                className={`${inputClasses} resize-none`}
                 placeholder="Describe the solution..."
               />
             </div>
 
             {/* To Do */}
             <div className="mb-6">
-              <label
-                htmlFor="toDo"
-                className="block text-sm font-medium text-navy-200 mb-2"
-              >
+              <label htmlFor="toDo" className={labelClasses}>
                 To Do
               </label>
               <textarea
@@ -249,17 +227,14 @@ export function IssueFormPage() {
                 value={toDo}
                 onChange={(e) => setToDo(e.target.value)}
                 rows={3}
-                className="w-full px-4 py-3 bg-navy-800/50 border border-navy-600 rounded-lg text-white placeholder-navy-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all resize-none"
+                className={`${inputClasses} resize-none`}
                 placeholder="List action items (optional)..."
               />
             </div>
 
             {/* To Do Tools */}
             <div className="mb-6">
-              <label
-                htmlFor="toDoTools"
-                className="block text-sm font-medium text-navy-200 mb-2"
-              >
+              <label htmlFor="toDoTools" className={labelClasses}>
                 Tools Required
               </label>
               <textarea
@@ -267,17 +242,14 @@ export function IssueFormPage() {
                 value={toDoTools}
                 onChange={(e) => setToDoTools(e.target.value)}
                 rows={3}
-                className="w-full px-4 py-3 bg-navy-800/50 border border-navy-600 rounded-lg text-white placeholder-navy-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all resize-none"
+                className={`${inputClasses} resize-none`}
                 placeholder="List required tools and resources (optional)..."
               />
             </div>
 
             {/* Progress */}
             <div className="mb-6">
-              <label
-                htmlFor="progress"
-                className="block text-sm font-medium text-navy-200 mb-2"
-              >
+              <label htmlFor="progress" className={labelClasses}>
                 Progress (%)
               </label>
               <input
@@ -290,10 +262,10 @@ export function IssueFormPage() {
                   const value = e.target.value;
                   setProgress(value === "" ? 0 : parseInt(value));
                 }}
-                className="w-full px-4 py-3 bg-navy-800/50 border border-navy-600 rounded-lg text-white placeholder-navy-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
+                className={inputClasses}
                 placeholder="0"
               />
-              <p className="text-xs text-navy-400 mt-1">
+              <p className="text-xs text-ink-400 mt-1 font-mono">
                 Enter a value between 0-100. Default is 0% (On Progress)
               </p>
             </div>
@@ -301,10 +273,7 @@ export function IssueFormPage() {
             {/* Dates Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div>
-                <label
-                  htmlFor="openDate"
-                  className="block text-sm font-medium text-navy-200 mb-2"
-                >
+                <label htmlFor="openDate" className={labelClasses}>
                   Open Date *
                 </label>
                 <input
@@ -313,14 +282,11 @@ export function IssueFormPage() {
                   value={openDate}
                   onChange={(e) => setOpenDate(e.target.value)}
                   required
-                  className="w-full px-4 py-3 bg-navy-800/50 border border-navy-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
+                  className={inputClasses}
                 />
               </div>
               <div>
-                <label
-                  htmlFor="dueDate"
-                  className="block text-sm font-medium text-navy-200 mb-2"
-                >
+                <label htmlFor="dueDate" className={labelClasses}>
                   Due Date *
                 </label>
                 <input
@@ -329,14 +295,11 @@ export function IssueFormPage() {
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
                   required
-                  className="w-full px-4 py-3 bg-navy-800/50 border border-navy-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
+                  className={inputClasses}
                 />
               </div>
               <div>
-                <label
-                  htmlFor="actualCloseDate"
-                  className="block text-sm font-medium text-navy-200 mb-2"
-                >
+                <label htmlFor="actualCloseDate" className={labelClasses}>
                   Actual Close Date
                 </label>
                 <input
@@ -344,9 +307,9 @@ export function IssueFormPage() {
                   id="actualCloseDate"
                   value={actualCloseDate}
                   onChange={(e) => setActualCloseDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-navy-800/50 border border-navy-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
+                  className={inputClasses}
                 />
-                <p className="text-xs text-navy-400 mt-1">
+                <p className="text-xs text-ink-400 mt-1 font-mono">
                   Fill when issue is resolved
                 </p>
               </div>
@@ -354,33 +317,29 @@ export function IssueFormPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="mb-6 bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg text-sm">
-                {error}
+              <div className="mb-6">
+                <ErrorBanner message={error} />
               </div>
             )}
 
             {/* Buttons */}
             <div className="flex gap-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 bg-linear-to-r from-yellow-400 to-yellow-500 text-navy-900 font-semibold py-3 px-6 rounded-lg hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-navy-900 transition-all duration-200 shadow-lg shadow-yellow-400/20 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+              <Button type="submit" disabled={loading} className="flex-1">
                 {loading
                   ? "Saving..."
                   : isEditMode
                   ? "Update Issue"
                   : "Create Issue"}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="secondary"
                 onClick={() => navigate(-1)}
-                className="px-6 py-3 bg-navy-800 text-yellow-400 rounded-lg hover:bg-navy-700 transition-colors border border-navy-600"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
-          </div>
+          </Panel>
         </form>
       </div>
     </div>

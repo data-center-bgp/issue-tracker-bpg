@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../hooks/useAuth";
+import { Panel } from "../components/ui/Panel";
+import { Button } from "../components/ui/Button";
+import { ErrorBanner } from "../components/ui/ErrorBanner";
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
@@ -38,19 +41,13 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-navy-950 via-navy-900 to-navy-800">
-      {/* Decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-yellow-400/10 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-yellow-400/10 rounded-full blur-3xl"></div>
-      </div>
-
-      <div className="w-full max-w-md relative z-10">
+    <div className="min-h-screen bg-ledger flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
         {/* Logo/Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-yellow-400 to-yellow-500 rounded-2xl mb-4 shadow-lg shadow-yellow-400/20">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-gold-400 rounded-sm mb-4">
             <svg
-              className="w-8 h-8 text-navy-900"
+              className="w-7 h-7 text-ink-950"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -63,13 +60,15 @@ export function LoginPage() {
               />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Issue Tracker</h1>
-          <p className="text-navy-300">Track and manage your team's issues</p>
+          <h1 className="font-display text-3xl font-semibold text-ink-50 mb-2">
+            Issue Tracker
+          </h1>
+          <p className="text-ink-300">Track and manage your team's issues</p>
         </div>
 
         {/* Auth Card */}
-        <div className="bg-navy-900/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-navy-700/50 p-8">
-          <h2 className="text-2xl font-bold text-white mb-6 text-center">
+        <Panel className="p-8">
+          <h2 className="font-display text-xl font-semibold text-ink-50 mb-6 text-center">
             Sign In
           </h2>
 
@@ -77,7 +76,7 @@ export function LoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-navy-200 mb-2"
+                className="block text-sm font-medium text-ink-200 mb-2"
               >
                 Email Address
               </label>
@@ -87,7 +86,7 @@ export function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-navy-800/50 border border-navy-600 rounded-lg text-white placeholder-navy-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-ink-800 border border-ink-700 rounded-sm text-ink-50 placeholder-ink-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent transition-all"
                 placeholder="you@company.com"
               />
             </div>
@@ -95,7 +94,7 @@ export function LoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-navy-200 mb-2"
+                className="block text-sm font-medium text-ink-200 mb-2"
               >
                 Password
               </label>
@@ -106,42 +105,34 @@ export function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 bg-navy-800/50 border border-navy-600 rounded-lg text-white placeholder-navy-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-ink-800 border border-ink-700 rounded-sm text-ink-50 placeholder-ink-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent transition-all"
                 placeholder="••••••••"
               />
             </div>
 
             <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center text-navy-300 cursor-pointer">
+              <label className="flex items-center text-ink-300 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="mr-2 rounded border-navy-600 text-yellow-400 focus:ring-yellow-400"
+                  className="mr-2 rounded-sm border-ink-600 text-gold-400 focus:ring-gold-400"
                 />
                 Remember me
               </label>
               <a
                 href="#"
-                className="text-yellow-400 hover:text-yellow-300 transition-colors"
+                className="text-gold-400 hover:text-gold-300 transition-colors"
               >
                 Forgot password?
               </a>
             </div>
 
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
+            {error && <ErrorBanner message={error} />}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-linear-to-r from-yellow-400 to-yellow-500 text-navy-900 font-semibold py-3 px-4 rounded-lg hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-navy-900 transition-all duration-200 shadow-lg shadow-yellow-400/20 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <Button type="submit" disabled={loading} className="w-full">
               {loading ? (
                 <span className="flex items-center justify-center">
                   <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-navy-900"
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-ink-950"
                     fill="none"
                     viewBox="0 0 24 24"
                   >
@@ -164,12 +155,12 @@ export function LoginPage() {
               ) : (
                 <span>Sign In</span>
               )}
-            </button>
+            </Button>
           </form>
-        </div>
+        </Panel>
 
         {/* Footer */}
-        <p className="text-center text-navy-400 text-sm mt-6">
+        <p className="text-center text-ink-400 text-sm mt-6 font-mono uppercase tracking-widest text-xs">
           Protected by enterprise-grade security
         </p>
       </div>

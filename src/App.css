@@ -2,26 +2,52 @@
 
 /* @theme is a Tailwind CSS v4 directive */
 @theme {
-  --color-navy-50: #f0f4f8;
-  --color-navy-100: #d9e2ec;
-  --color-navy-200: #bcccdc;
-  --color-navy-300: #9fb3c8;
-  --color-navy-400: #829ab1;
-  --color-navy-500: #627d98;
-  --color-navy-600: #486581;
-  --color-navy-700: #334e68;
-  --color-navy-800: #243b53;
-  --color-navy-900: #102a43;
-  --color-navy-950: #0a1929;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 
-  --color-yellow-50: #fffbeb;
-  --color-yellow-100: #fef3c7;
-  --color-yellow-200: #fde68a;
-  --color-yellow-300: #fcd34d;
-  --color-yellow-400: #fbbf24;
-  --color-yellow-500: #f59e0b;
-  --color-yellow-600: #d97706;
-  --color-yellow-700: #b45309;
-  --color-yellow-800: #92400e;
-  --color-yellow-900: #78350f;
+  --color-ink-50: #eef1f6;
+  --color-ink-100: #d9e0ea;
+  --color-ink-200: #b7c3d6;
+  --color-ink-300: #8fa0be;
+  --color-ink-400: #66799f;
+  --color-ink-500: #4a5a82;
+  --color-ink-600: #384368;
+  --color-ink-700: #223056;
+  --color-ink-800: #16213a;
+  --color-ink-900: #0f1830;
+  --color-ink-950: #0b1220;
+
+  --color-gold-50: #fcf6e3;
+  --color-gold-100: #f8e9be;
+  --color-gold-200: #f0d27d;
+  --color-gold-300: #e9bc3c;
+  --color-gold-400: #f2b705;
+  --color-gold-500: #d9a400;
+  --color-gold-600: #b38400;
+  --color-gold-700: #8c6600;
+  --color-gold-800: #664a00;
+  --color-gold-900: #402e00;
+
+  --color-rust-50: #fbeee8;
+  --color-rust-100: #f3d2c1;
+  --color-rust-200: #e6a587;
+  --color-rust-300: #d97a52;
+  --color-rust-400: #c2542d;
+  --color-rust-500: #a8431f;
+  --color-rust-600: #8a3519;
+  --color-rust-700: #6b2913;
+  --color-rust-800: #4d1d0d;
+  --color-rust-900: #301207;
+
+  --color-moss-50: #eaf3ec;
+  --color-moss-100: #c9e0d0;
+  --color-moss-200: #9cc8a9;
+  --color-moss-300: #6eaf81;
+  --color-moss-400: #4c9a6a;
+  --color-moss-500: #3b7e54;
+  --color-moss-600: #2e6342;
+  --color-moss-700: #224a31;
+  --color-moss-800: #163220;
+  --color-moss-900: #0b1b11;
 }
