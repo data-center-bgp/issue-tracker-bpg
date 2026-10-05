@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "danger";
+  variant?: "primary" | "secondary" | "danger" | "danger-solid";
 }
 
 const variantClasses = {
@@ -11,6 +11,8 @@ const variantClasses = {
     "bg-ink-900 text-gold-400 border border-ink-700 hover:bg-ink-800",
   danger:
     "bg-ink-900 text-rust-300 border border-rust-700 hover:bg-rust-900/40 disabled:opacity-50 disabled:cursor-not-allowed",
+  "danger-solid":
+    "bg-rust-500 text-ink-50 font-semibold hover:bg-rust-400 disabled:opacity-50 disabled:cursor-not-allowed",
 };
 
 export function Button({

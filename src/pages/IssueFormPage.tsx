@@ -5,6 +5,7 @@ import { Panel } from "../components/ui/Panel";
 import { Button } from "../components/ui/Button";
 import { ErrorBanner } from "../components/ui/ErrorBanner";
 import { BackLink } from "../components/ui/BackLink";
+import { CheckIcon, XIcon } from "../components/ui/icons";
 
 interface KPI {
   id: number;
@@ -147,18 +148,17 @@ export function IssueFormPage() {
   const labelClasses = "block text-sm font-medium text-ink-200 mb-2";
 
   return (
-    <div className="min-h-screen bg-ledger p-8">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <BackLink onClick={() => navigate(-1)}>Back</BackLink>
-          <h1 className="font-display text-3xl font-semibold text-ink-50 mb-2">
-            {isEditMode ? "Edit Issue" : "Add New Issue"}
-          </h1>
-        </div>
+    <div className="max-w-3xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <BackLink onClick={() => navigate(-1)}>Back</BackLink>
+        <h1 className="font-display text-3xl font-semibold text-ink-50 mb-2">
+          {isEditMode ? "Edit Issue" : "Add New Issue"}
+        </h1>
+      </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="space-y-6">
           <Panel className="p-8">
             {/* KPI Selection */}
             <div className="mb-6">
@@ -324,7 +324,12 @@ export function IssueFormPage() {
 
             {/* Buttons */}
             <div className="flex gap-4">
-              <Button type="submit" disabled={loading} className="flex-1">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="flex-1 flex items-center justify-center gap-2"
+              >
+                {!loading && <CheckIcon className="w-4 h-4" />}
                 {loading
                   ? "Saving..."
                   : isEditMode
@@ -335,13 +340,14 @@ export function IssueFormPage() {
                 type="button"
                 variant="secondary"
                 onClick={() => navigate(-1)}
+                className="flex items-center gap-2"
               >
+                <XIcon className="w-4 h-4" />
                 Cancel
               </Button>
             </div>
           </Panel>
         </form>
-      </div>
     </div>
   );
 }

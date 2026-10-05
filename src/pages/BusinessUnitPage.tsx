@@ -4,10 +4,12 @@ import { supabase } from "../lib/supabase";
 import { Panel } from "../components/ui/Panel";
 import { Button } from "../components/ui/Button";
 import { ErrorBanner } from "../components/ui/ErrorBanner";
-import { FullScreenLoader } from "../components/ui/Spinner";
+import { Spinner } from "../components/ui/Spinner";
 import { StatusStamp } from "../components/ui/StatusStamp";
 import { ProgressGauge } from "../components/ui/ProgressGauge";
 import { BackLink } from "../components/ui/BackLink";
+import { PlusIcon } from "../components/ui/icons";
+import { formatBusinessUnitName } from "../lib/format";
 
 interface Issue {
   id: number;
@@ -102,13 +104,6 @@ export function BusinessUnitPage() {
     }
   }, [businessUnitId, fetchBusinessUnitAndIssues, location.key]);
 
-  const formatBusinessUnitName = (name: string) => {
-    return name
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(" ");
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -133,60 +128,61 @@ export function BusinessUnitPage() {
   };
 
   if (loading) {
-    return <FullScreenLoader />;
+    return (
+      <div className="flex justify-center py-24">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error || !businessUnit) {
     return (
-      <div className="min-h-screen bg-ledger p-8">
-        <div className="max-w-4xl mx-auto">
-          <ErrorBanner message={error || "Business unit not found"} />
-          <Button
-            variant="primary"
-            onClick={() => navigate("/dashboard")}
-            className="mt-4"
-          >
-            Back to Dashboard
-          </Button>
-        </div>
+      <div className="max-w-4xl mx-auto">
+        <ErrorBanner message={error || "Business unit not found"} />
+        <Button
+          variant="primary"
+          onClick={() => navigate("/dashboard")}
+          className="mt-4"
+        >
+          Back to Dashboard
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-ledger p-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <BackLink onClick={() => navigate("/dashboard")}>
-            Back to Dashboard
-          </BackLink>
-          <h1 className="font-display text-3xl font-semibold text-ink-50 mb-2">
-            {formatBusinessUnitName(businessUnit.business_unit)}
-          </h1>
-          <p className="text-ink-300 font-mono text-sm">
-            {issues.length} {issues.length === 1 ? "issue" : "issues"} tracked
-          </p>
-        </div>
+    <div className="max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <BackLink onClick={() => navigate("/dashboard")}>
+          Back to Dashboard
+        </BackLink>
+        <h1 className="font-display text-3xl font-semibold text-ink-50 mb-2">
+          {formatBusinessUnitName(businessUnit.business_unit)}
+        </h1>
+        <p className="text-ink-300 font-mono text-sm">
+          {issues.length} {issues.length === 1 ? "issue" : "issues"} tracked
+        </p>
+      </div>
 
-        {/* Add Issue Button */}
-        <div className="mb-6">
-          <Button
-            onClick={() =>
-              navigate(`/business-unit/${businessUnitId}/new-issue`)
-            }
-          >
-            + Add New Issue
-          </Button>
-        </div>
+      {/* Add Issue Button */}
+      <div className="mb-6">
+        <Button
+          onClick={() => navigate(`/business-unit/${businessUnitId}/new-issue`)}
+          className="flex items-center gap-2"
+        >
+          <PlusIcon className="w-4 h-4" />
+          Add New Issue
+        </Button>
+      </div>
 
-        {/* Issues List */}
-        <div className="mb-4">
-          <h2 className="font-display text-xl font-semibold text-ink-50 mb-4">
-            Issues
-          </h2>
-        </div>
-        {issues.length === 0 ? (
+      {/* Issues List */}
+      <div className="mb-4">
+        <h2 className="font-display text-xl font-semibold text-ink-50 mb-4">
+          Issues
+        </h2>
+      </div>
+      {issues.length === 0 ? (
           <Panel className="p-12">
             <p className="text-ink-300 text-center text-lg">
               No issues found for this business unit.
@@ -280,9 +276,8 @@ export function BusinessUnitPage() {
               Showing {startIndex + 1} to {Math.min(endIndex, issues.length)} of{" "}
               {issues.length} issues
             </div>
-          </>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }

@@ -4,10 +4,12 @@ import { supabase } from "../lib/supabase";
 import { Panel } from "../components/ui/Panel";
 import { Button } from "../components/ui/Button";
 import { ErrorBanner } from "../components/ui/ErrorBanner";
-import { FullScreenLoader } from "../components/ui/Spinner";
+import { Spinner } from "../components/ui/Spinner";
 import { StatusStamp } from "../components/ui/StatusStamp";
 import { ProgressGauge } from "../components/ui/ProgressGauge";
 import { BackLink } from "../components/ui/BackLink";
+import { PencilIcon, TrashIcon } from "../components/ui/icons";
+import { formatBusinessUnitName } from "../lib/format";
 
 interface Issue {
   id: number;
@@ -114,13 +116,6 @@ export function IssueDetailPage() {
     }
   };
 
-  const formatBusinessUnitName = (name: string) => {
-    return name
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(" ");
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -140,46 +135,43 @@ export function IssueDetailPage() {
   };
 
   if (loading) {
-    return <FullScreenLoader />;
+    return (
+      <div className="flex justify-center py-24">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error || !issue || !businessUnit) {
     return (
-      <div className="min-h-screen bg-ledger p-8">
-        <div className="max-w-4xl mx-auto">
-          <ErrorBanner message={error || "Issue not found"} />
-          <Button
-            variant="primary"
-            onClick={() => navigate(-1)}
-            className="mt-4"
-          >
-            Go Back
-          </Button>
-        </div>
+      <div className="max-w-4xl mx-auto">
+        <ErrorBanner message={error || "Issue not found"} />
+        <Button variant="primary" onClick={() => navigate(-1)} className="mt-4">
+          Go Back
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-ledger p-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <BackLink onClick={() => navigate(`/business-unit/${issue.business_unit_id}`)}>
-            Back to {formatBusinessUnitName(businessUnit.business_unit)}
-          </BackLink>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="font-display text-3xl font-semibold text-ink-50">
-              Issue Details
-            </h1>
-          </div>
-          <p className="text-ink-400 font-mono text-sm">
-            #{issue.id.toString().padStart(4, "0")}
-          </p>
+    <div className="max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <BackLink onClick={() => navigate(`/business-unit/${issue.business_unit_id}`)}>
+          Back to {formatBusinessUnitName(businessUnit.business_unit)}
+        </BackLink>
+        <div className="flex items-center gap-3 mb-2">
+          <h1 className="font-display text-3xl font-semibold text-ink-50">
+            Issue Details
+          </h1>
         </div>
+        <p className="text-ink-400 font-mono text-sm">
+          #{issue.id.toString().padStart(4, "0")}
+        </p>
+      </div>
 
-        {/* Main Content */}
-        <div className="space-y-4">
+      {/* Main Content */}
+      <div className="space-y-4">
           {/* Business Unit & KPI Info */}
           <Panel className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -401,7 +393,13 @@ export function IssueDetailPage() {
               <span className="text-ink-200 font-mono text-sm">
                 Delete this issue? This cannot be undone.
               </span>
-              <Button variant="danger" onClick={handleDelete} disabled={deleting}>
+              <Button
+                variant="danger"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex items-center gap-2"
+              >
+                <TrashIcon className="w-4 h-4" />
                 {deleting ? "Deleting..." : "Confirm Delete"}
               </Button>
               <Button
@@ -414,19 +412,24 @@ export function IssueDetailPage() {
             </div>
           ) : (
             <div className="flex gap-4">
-              <Button onClick={() => navigate(`/issue/${issue.id}/edit`)}>
+              <Button
+                onClick={() => navigate(`/issue/${issue.id}/edit`)}
+                className="flex items-center gap-2"
+              >
+                <PencilIcon className="w-4 h-4" />
                 Edit Issue
               </Button>
               <Button
                 variant="danger"
                 onClick={() => setConfirmingDelete(true)}
+                className="flex items-center gap-2"
               >
+                <TrashIcon className="w-4 h-4" />
                 Delete Issue
               </Button>
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }

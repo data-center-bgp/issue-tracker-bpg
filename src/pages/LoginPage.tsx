@@ -2,9 +2,19 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../hooks/useAuth";
-import { Panel } from "../components/ui/Panel";
 import { Button } from "../components/ui/Button";
 import { ErrorBanner } from "../components/ui/ErrorBanner";
+import { LockIcon } from "../components/ui/icons";
+
+const MANIFEST_TICKER = [
+  "PROBLEM",
+  "SOLUTION",
+  "TO DO",
+  "PROGRESS",
+  "STATUS",
+  "KPI",
+  "DUE DATE",
+];
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
@@ -41,13 +51,13 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-ledger flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo/Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-gold-400 rounded-sm mb-4">
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Brand panel */}
+      <div className="relative bg-ledger flex flex-col justify-between overflow-hidden md:w-3/5 min-h-[240px] md:min-h-screen p-8 md:p-16">
+        <div className="flex items-center gap-3">
+          <div className="inline-flex items-center justify-center w-10 h-10 bg-gold-400 rounded-sm">
             <svg
-              className="w-7 h-7 text-ink-950"
+              className="w-5 h-5 text-ink-950"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -60,17 +70,45 @@ export function LoginPage() {
               />
             </svg>
           </div>
-          <h1 className="font-display text-3xl font-semibold text-ink-50 mb-2">
-            Issue Tracker
-          </h1>
-          <p className="text-ink-300">Track and manage your team's issues</p>
+          <span className="font-mono text-xs uppercase tracking-widest text-ink-300">
+            Barokah Perkasa Group
+          </span>
         </div>
 
-        {/* Auth Card */}
-        <Panel className="p-8">
-          <h2 className="font-display text-xl font-semibold text-ink-50 mb-6 text-center">
+        <div className="max-w-lg">
+          <h1 className="font-display text-4xl md:text-6xl font-semibold text-ink-50 leading-tight mb-4">
+            Issue
+            <br />
+            Tracker
+          </h1>
+          <p className="text-ink-300 text-lg">
+            One ledger for every business unit's problems, solutions, and
+            progress toward close.
+          </p>
+        </div>
+
+        {/* Manifest ticker */}
+        <div className="hidden md:block overflow-hidden mask-fade-x">
+          <div className="ticker-track flex items-center gap-4 w-max font-mono text-xs uppercase tracking-widest text-ink-500">
+            {[...MANIFEST_TICKER, ...MANIFEST_TICKER].map((label, i) => (
+              <span key={i} className="flex items-center gap-4 shrink-0">
+                {label}
+                <span className="text-ink-700">&middot;</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Sign-in panel */}
+      <div className="flex-1 flex items-center justify-center bg-ink-950 p-8">
+        <div className="w-full max-w-sm">
+          <h2 className="font-display text-2xl font-semibold text-ink-50 mb-1">
             Sign In
           </h2>
+          <p className="text-ink-400 text-sm mb-8">
+            Enter your credentials to access your business unit.
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -86,7 +124,7 @@ export function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-ink-800 border border-ink-700 rounded-sm text-ink-50 placeholder-ink-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-ink-900 border border-ink-700 rounded-sm text-ink-50 placeholder-ink-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent transition-all"
                 placeholder="you@company.com"
               />
             </div>
@@ -105,7 +143,7 @@ export function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 bg-ink-800 border border-ink-700 rounded-sm text-ink-50 placeholder-ink-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-ink-900 border border-ink-700 rounded-sm text-ink-50 placeholder-ink-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent transition-all"
                 placeholder="••••••••"
               />
             </div>
@@ -153,16 +191,18 @@ export function LoginPage() {
                   Processing...
                 </span>
               ) : (
-                <span>Sign In</span>
+                <span className="flex items-center justify-center gap-2">
+                  <LockIcon className="w-4 h-4" />
+                  Sign In
+                </span>
               )}
             </Button>
           </form>
-        </Panel>
 
-        {/* Footer */}
-        <p className="text-center text-ink-400 text-sm mt-6 font-mono uppercase tracking-widest text-xs">
-          Protected by enterprise-grade security
-        </p>
+          <p className="text-center text-ink-500 text-xs mt-8 font-mono uppercase tracking-widest">
+            Protected by enterprise-grade security
+          </p>
+        </div>
       </div>
     </div>
   );

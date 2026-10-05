@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
-import { ProtectedRoute } from "./components/ProtectedRoute";
+import { ProtectedLayout } from "./components/ProtectedLayout";
 import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { BusinessUnitPage } from "./pages/BusinessUnitPage";
@@ -14,46 +14,19 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/business-unit/:businessUnitId"
-            element={
-              <ProtectedRoute>
-                <BusinessUnitPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/business-unit/:businessUnitId/new-issue"
-            element={
-              <ProtectedRoute>
-                <IssueFormPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/issue/:issueId"
-            element={
-              <ProtectedRoute>
-                <IssueDetailPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/issue/:issueId/edit"
-            element={
-              <ProtectedRoute>
-                <IssueFormPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route element={<ProtectedLayout />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route
+              path="/business-unit/:businessUnitId"
+              element={<BusinessUnitPage />}
+            />
+            <Route
+              path="/business-unit/:businessUnitId/new-issue"
+              element={<IssueFormPage />}
+            />
+            <Route path="/issue/:issueId" element={<IssueDetailPage />} />
+            <Route path="/issue/:issueId/edit" element={<IssueFormPage />} />
+          </Route>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>
