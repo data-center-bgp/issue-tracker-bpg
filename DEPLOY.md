@@ -1,7 +1,7 @@
 # Deploying Issue Tracker to the VPS
 
 The app is a static Vite build. Nginx serves the `dist/` folder directly at
-**https://monitoring-issue.barokahperkasagroup.com** with a Let's Encrypt
+**https://monitoring-issue.barokahperkasagroup.tech** with a Let's Encrypt
 certificate. There is no Node process to run or restart: Node is only needed
 to build.
 
@@ -20,7 +20,7 @@ In the company's DNS manager, add an **A record**:
 step 5, since Let's Encrypt needs it:
 
 ```bash
-nslookup monitoring-issue.barokahperkasagroup.com
+nslookup monitoring-issue.barokahperkasagroup.tech
 ```
 
 ## 1. Check the VPS
@@ -92,7 +92,7 @@ sudo nginx -t && sudo systemctl reload nginx
 
 If this Nginx uses `/etc/nginx/conf.d/` instead of `sites-available`, copy the
 file to `/etc/nginx/conf.d/monitoring-issue.conf` and skip the `ln` line.
-`http://monitoring-issue.barokahperkasagroup.com` should now show the login
+`http://monitoring-issue.barokahperkasagroup.tech` should now show the login
 page.
 
 The config assumes the code is in `/opt/issue-tracker-bpg`. If you cloned it
@@ -102,7 +102,7 @@ elsewhere, change `root` in the file first.
 
 ```bash
 sudo apt-get install -y certbot python3-certbot-nginx   # if certbot isn't installed yet
-sudo certbot --nginx -d monitoring-issue.barokahperkasagroup.com
+sudo certbot --nginx -d monitoring-issue.barokahperkasagroup.tech
 ```
 
 When asked, choose to **redirect** HTTP to HTTPS. Certbot renews the
@@ -110,7 +110,7 @@ certificate automatically.
 
 ## 7. Check it
 
-- Open https://monitoring-issue.barokahperkasagroup.com and log in. The
+- Open https://monitoring-issue.barokahperkasagroup.tech and log in. The
   sidebar should list the business units.
 - Refresh on a deep link such as `/dashboard`. It should reload the page, not
   show a 404.
