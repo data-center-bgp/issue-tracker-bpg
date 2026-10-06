@@ -14,7 +14,8 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   const displayName = profile?.head_name || user?.email;
 
   return (
-    <header className="flex items-center justify-between gap-4 px-4 md:px-8 py-4 border-b border-ink-700 bg-ink-900">
+    // h-16 must match the brand row in Sidebar so their bottom borders line up
+    <header className="sticky top-0 z-20 h-16 shrink-0 flex items-center justify-between gap-4 px-4 md:px-8 border-b border-ink-700 bg-ink-900">
       <button
         onClick={onMenuClick}
         className="md:hidden text-ink-200 hover:text-ink-50"
@@ -49,9 +50,10 @@ export function TopBar({ onMenuClick }: TopBarProps) {
           )}
         </div>
         <Button
-          variant="danger-solid"
+          variant="danger"
+          size="sm"
           onClick={signOut}
-          className="px-4 py-2 flex items-center gap-2"
+          className="flex items-center gap-2"
         >
           <LogoutIcon className="w-4 h-4" />
           Sign Out
