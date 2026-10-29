@@ -31,7 +31,6 @@ export function IssueFormPage() {
   const [solution, setSolution] = useState("");
   const [toDo, setToDo] = useState("");
   const [toDoTools, setToDoTools] = useState("");
-  const [progress, setProgress] = useState<number>(0);
   const [openDate, setOpenDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -74,7 +73,6 @@ export function IssueFormPage() {
       setSolution(data.solution || "");
       setToDo(data.to_do || "");
       setToDoTools(data.to_do_tools || "");
-      setProgress(data.progress || 0);
       setOpenDate(
         data.open_date
           ? new Date(data.open_date).toISOString().split("T")[0]
@@ -106,15 +104,14 @@ export function IssueFormPage() {
     setError(null);
 
     try {
-      const status = progress === 100 ? "completed" : "on_progress";
+      // Progress and status are not edited here: they come from the progress
+      // timeline on the issue detail page.
       const issueData = {
         kpi_id: kpiId,
         problem,
         solution,
         to_do: toDo || null,
         to_do_tools: toDoTools || null,
-        progress: progress || 0,
-        status,
         open_date: openDate,
         due_date: dueDate,
         actual_close_date: actualCloseDate || null,
@@ -136,6 +133,8 @@ export function IssueFormPage() {
             {
               ...issueData,
               business_unit_id: parseInt(businessUnitId!),
+              progress: 0,
+              status: "on_progress",
               created_at: new Date().toISOString(),
             },
           ])
@@ -256,29 +255,6 @@ export function IssueFormPage() {
               />
             </div>
 
-            {/* Progress */}
-            <div className="mb-6">
-              <label htmlFor="progress" className={labelClasses}>
-                Progress (%)
-              </label>
-              <input
-                type="number"
-                id="progress"
-                min="0"
-                max="100"
-                value={progress === 0 ? "" : progress}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setProgress(value === "" ? 0 : parseInt(value));
-                }}
-                className={inputClasses}
-                placeholder="0"
-              />
-              <p className="text-xs text-ink-400 mt-1 font-mono">
-                Enter a value between 0-100. Default is 0% (On Progress)
-              </p>
-            </div>
-
             {/* Dates Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div>
@@ -319,7 +295,7 @@ export function IssueFormPage() {
                   className={inputClasses}
                 />
                 <p className="text-xs text-ink-400 mt-1 font-mono">
-                  Fill when issue is resolved
+                  Set automatically when progress reaches 100%
                 </p>
               </div>
             </div>

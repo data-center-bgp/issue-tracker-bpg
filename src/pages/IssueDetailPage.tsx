@@ -9,6 +9,11 @@ import { StatusStamp } from "../components/ui/StatusStamp";
 import { ProgressGauge } from "../components/ui/ProgressGauge";
 import { BackLink } from "../components/ui/BackLink";
 import { PencilIcon, TrashIcon } from "../components/ui/icons";
+import {
+  ProgressTimeline,
+  type ProgressUpdate,
+} from "../components/ui/ProgressTimeline";
+import { ProgressUpdateForm } from "../components/ProgressUpdateForm";
 import { formatBusinessUnitName, getErrorMessage } from "../lib/format";
 
 interface Issue {
@@ -44,11 +49,41 @@ export function IssueDetailPage() {
   const [issue, setIssue] = useState<Issue | null>(null);
   const [businessUnit, setBusinessUnit] = useState<BusinessUnit | null>(null);
   const [kpi, setKpi] = useState<KPI | null>(null);
+  const [updates, setUpdates] = useState<ProgressUpdate[]>([]);
+  const [updatesError, setUpdatesError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const fetchUpdates = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("issue_progress_updates")
+      .select("id, issue_id, progress, note, author_name, created_at")
+      .eq("issue_id", issueId)
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true });
+
+    if (error) {
+      setUpdatesError(getErrorMessage(error, "Failed to load progress updates"));
+      return;
+    }
+    setUpdatesError(null);
+    setUpdates(data ?? []);
+  }, [issueId]);
+
+  // After a new update the database trigger changes the issue's progress and
+  // status, so reload both without blanking the page.
+  const refreshProgress = useCallback(async () => {
+    const { data } = await supabase
+      .from("issues")
+      .select("*")
+      .eq("id", issueId)
+      .single();
+    if (data) setIssue(data);
+    await fetchUpdates();
+  }, [issueId, fetchUpdates]);
 
   const fetchIssueDetails = useCallback(async () => {
     try {
@@ -84,12 +119,14 @@ export function IssueDetailPage() {
 
         if (!kpiError) setKpi(kpiData);
       }
+
+      await fetchUpdates();
     } catch (error: unknown) {
       setError(getErrorMessage(error, "Failed to fetch issue"));
     } finally {
       setLoading(false);
     }
-  }, [issueId]);
+  }, [issueId, fetchUpdates]);
 
   useEffect(() => {
     if (issueId) {
@@ -319,10 +356,32 @@ export function IssueDetailPage() {
             <ProgressGauge progress={issue.progress} />
           </Panel>
 
-          {/* Timeline */}
+          {/* Progress Timeline */}
+          <Panel accent="gold" className="p-6">
+            <h2 className="font-display text-lg font-semibold text-ink-50 mb-4">
+              Progress Timeline
+            </h2>
+            {updatesError ? (
+              <ErrorBanner message={updatesError} />
+            ) : (
+              <>
+                <ProgressUpdateForm
+                  issueId={issue.id}
+                  currentProgress={issue.progress}
+                  onAdded={refreshProgress}
+                />
+                <ProgressTimeline
+                  updates={updates}
+                  openedAt={issue.created_at}
+                />
+              </>
+            )}
+          </Panel>
+
+          {/* Dates */}
           <Panel className="p-6">
             <h2 className="font-display text-lg font-semibold text-ink-50 mb-4">
-              Timeline
+              Dates
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
