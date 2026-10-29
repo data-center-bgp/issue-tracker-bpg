@@ -9,7 +9,7 @@ import { StatusStamp } from "../components/ui/StatusStamp";
 import { ProgressGauge } from "../components/ui/ProgressGauge";
 import { BackLink } from "../components/ui/BackLink";
 import { PencilIcon, TrashIcon } from "../components/ui/icons";
-import { formatBusinessUnitName } from "../lib/format";
+import { formatBusinessUnitName, getErrorMessage } from "../lib/format";
 
 interface Issue {
   id: number;
@@ -85,9 +85,7 @@ export function IssueDetailPage() {
         if (!kpiError) setKpi(kpiData);
       }
     } catch (error: unknown) {
-      setError(
-        error instanceof Error ? error.message : "Failed to fetch issue"
-      );
+      setError(getErrorMessage(error, "Failed to fetch issue"));
     } finally {
       setLoading(false);
     }
@@ -109,9 +107,7 @@ export function IssueDetailPage() {
       if (error) throw error;
       navigate(`/business-unit/${issue.business_unit_id}`);
     } catch (error: unknown) {
-      setDeleteError(
-        error instanceof Error ? error.message : "Failed to delete issue"
-      );
+      setDeleteError(getErrorMessage(error, "Failed to delete issue"));
       setDeleting(false);
     }
   };

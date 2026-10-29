@@ -6,6 +6,7 @@ import { Button } from "../components/ui/Button";
 import { ErrorBanner } from "../components/ui/ErrorBanner";
 import { BackLink } from "../components/ui/BackLink";
 import { CheckIcon, XIcon } from "../components/ui/icons";
+import { getErrorMessage } from "../lib/format";
 
 interface KPI {
   id: number;
@@ -37,19 +38,19 @@ export function IssueFormPage() {
   const [dueDate, setDueDate] = useState("");
   const [actualCloseDate, setActualCloseDate] = useState("");
 
-  const fetchKPIs = useCallback(async () => {
-    if (businessUnitId) {
-      const { data, error } = await supabase
-        .from("kpis")
-        .select("id, kpi_type")
-        .eq("business_unit_id", businessUnitId)
-        .order("kpi_type", { ascending: true });
+  const fetchKPIs = useCallback(async (unitId: string | number) => {
+    const { data, error } = await supabase
+      .from("kpis")
+      .select("id, kpi_type")
+      .eq("business_unit_id", unitId)
+      .order("kpi_type", { ascending: true });
 
-      if (!error && data) {
-        setKpis(data);
-      }
+    if (error) {
+      setError(getErrorMessage(error, "Failed to fetch KPIs"));
+    } else if (data) {
+      setKpis(data);
     }
-  }, [businessUnitId]);
+  }, []);
 
   const fetchIssue = useCallback(async () => {
     if (issueId) {
@@ -61,11 +62,13 @@ export function IssueFormPage() {
         .single();
 
       if (error) {
-        setError("Failed to fetch issue");
+        setError(getErrorMessage(error, "Failed to fetch issue"));
         setLoading(false);
         return;
       }
 
+      // The edit route has no business unit in the URL, so take it from the issue.
+      await fetchKPIs(data.business_unit_id);
       setKpiId(data.kpi_id);
       setProblem(data.problem || "");
       setSolution(data.solution || "");
@@ -87,14 +90,15 @@ export function IssueFormPage() {
       );
       setLoading(false);
     }
-  }, [issueId]);
+  }, [issueId, fetchKPIs]);
 
   useEffect(() => {
-    fetchKPIs();
     if (isEditMode) {
       fetchIssue();
+    } else if (businessUnitId) {
+      fetchKPIs(businessUnitId);
     }
-  }, [fetchKPIs, fetchIssue, isEditMode]);
+  }, [fetchKPIs, fetchIssue, isEditMode, businessUnitId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,7 +108,6 @@ export function IssueFormPage() {
     try {
       const status = progress === 100 ? "completed" : "on_progress";
       const issueData = {
-        business_unit_id: businessUnitId ? parseInt(businessUnitId) : undefined,
         kpi_id: kpiId,
         problem,
         solution,
@@ -129,7 +132,13 @@ export function IssueFormPage() {
       } else {
         const { error } = await supabase
           .from("issues")
-          .insert([{ ...issueData, created_at: new Date().toISOString() }])
+          .insert([
+            {
+              ...issueData,
+              business_unit_id: parseInt(businessUnitId!),
+              created_at: new Date().toISOString(),
+            },
+          ])
           .select()
           .single();
 
@@ -137,7 +146,7 @@ export function IssueFormPage() {
         navigate(`/business-unit/${businessUnitId}`);
       }
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "Failed to save issue");
+      setError(getErrorMessage(error, "Failed to save issue"));
     } finally {
       setLoading(false);
     }

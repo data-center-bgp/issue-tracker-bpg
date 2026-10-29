@@ -9,7 +9,7 @@ import { StatusStamp } from "../components/ui/StatusStamp";
 import { ProgressGauge } from "../components/ui/ProgressGauge";
 import { BackLink } from "../components/ui/BackLink";
 import { PlusIcon } from "../components/ui/icons";
-import { formatBusinessUnitName } from "../lib/format";
+import { formatBusinessUnitName, getErrorMessage } from "../lib/format";
 
 interface Issue {
   id: number;
@@ -92,7 +92,7 @@ export function BusinessUnitPage() {
       setIssues(transformedIssues);
     } catch (error: unknown) {
       console.error("Fetch error:", error);
-      setError(error instanceof Error ? error.message : "Failed to fetch data");
+      setError(getErrorMessage(error, "Failed to fetch data"));
     } finally {
       setLoading(false);
     }
