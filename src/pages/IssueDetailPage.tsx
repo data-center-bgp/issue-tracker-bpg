@@ -73,18 +73,6 @@ export function IssueDetailPage() {
     setUpdates(data ?? []);
   }, [issueId]);
 
-  // After a new update the database trigger changes the issue's progress and
-  // status, so reload both without blanking the page.
-  const refreshProgress = useCallback(async () => {
-    const { data } = await supabase
-      .from("issues")
-      .select("*")
-      .eq("id", issueId)
-      .single();
-    if (data) setIssue(data);
-    await fetchUpdates();
-  }, [issueId, fetchUpdates]);
-
   const fetchIssueDetails = useCallback(async () => {
     try {
       setLoading(true);
@@ -368,7 +356,9 @@ export function IssueDetailPage() {
                 <ProgressUpdateForm
                   issueId={issue.id}
                   currentProgress={issue.progress}
-                  onAdded={refreshProgress}
+                  onAdded={() =>
+                    navigate(`/business-unit/${issue.business_unit_id}`)
+                  }
                 />
                 <ProgressTimeline
                   updates={updates}

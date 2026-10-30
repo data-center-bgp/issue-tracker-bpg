@@ -16,6 +16,15 @@ interface ProgressUpdateFormProps {
 const inputClasses =
   "w-full px-4 py-3 bg-ink-800 border border-ink-700 rounded-sm text-ink-50 placeholder-ink-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent transition-all";
 
+// Keep what the user types a clean 0-100 integer: "010" becomes "10", "250"
+// becomes "100". An empty field stays empty so it can be cleared and retyped.
+function normalizeProgress(value: string): string {
+  if (value === "") return "";
+  const n = Math.floor(Number(value));
+  if (Number.isNaN(n)) return "";
+  return String(Math.min(100, Math.max(0, n)));
+}
+
 export function ProgressUpdateForm({
   issueId,
   currentProgress,
@@ -66,13 +75,26 @@ export function ProgressUpdateForm({
         <input
           id="updateProgress"
           type="number"
+          inputMode="numeric"
           min={0}
           max={100}
           step={1}
           required
           value={progress}
-          onChange={(e) => setProgress(e.target.value)}
+          // Selecting on focus means typing replaces the old value.
+          onFocus={(e) => e.target.select()}
+          onChange={(e) => setProgress(normalizeProgress(e.target.value))}
           className={inputClasses}
+        />
+        <input
+          type="range"
+          aria-label="Progress slider"
+          min={0}
+          max={100}
+          step={5}
+          value={Number(progress) || 0}
+          onChange={(e) => setProgress(e.target.value)}
+          className="mt-3 w-full accent-gold-400"
         />
       </div>
       <div>
