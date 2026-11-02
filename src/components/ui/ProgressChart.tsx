@@ -18,8 +18,12 @@ function dayStart(value: string): number {
   return new Date(y, m - 1, d).getTime();
 }
 
-const formatDay = (time: number) =>
-  new Date(time).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+const formatDay = (time: number, withYear = false) =>
+  new Date(time).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    ...(withYear ? { year: "numeric" } : {}),
+  });
 
 export function ProgressChart({
   updates,
@@ -31,16 +35,20 @@ export function ProgressChart({
   // Fixed at mount so the chart doesn't shift between renders.
   const [now] = useState(() => Date.now());
   const times = updates.map((u) => new Date(u.created_at).getTime());
-  const dueEnd = dueDate ? dayStart(dueDate) + DAY : null;
+  // A missing or malformed date must not break the whole chart.
+  const dueDay = dueDate ? dayStart(dueDate) : NaN;
+  const dueEnd = Number.isFinite(dueDay) ? dueDay + DAY : null;
   const overdue = !completed && dueEnd !== null && now > dueEnd;
 
   const start = Math.min(
-    dayStart(openDate),
-    new Date(createdAt).getTime(),
-    ...times
+    ...[dayStart(openDate), new Date(createdAt).getTime(), ...times].filter(
+      Number.isFinite
+    ),
+    now
   );
   let end = Math.max(dueEnd ?? 0, ...times, completed ? 0 : now);
   if (end <= start) end = start + DAY;
+  const withYear = new Date(start).getFullYear() !== new Date(end - 1).getFullYear();
 
   const timeX = (t: number) => ((t - start) / (end - start)) * 100;
   const y = (p: number) => 100 - p;
@@ -49,9 +57,16 @@ export function ProgressChart({
   // single bar, so keep a minimum gap between steps. The due marker stays
   // true to the calendar.
   const gap = Math.min(5, 90 / (updates.length + 1));
+  // Room at the right edge for today's marker while the issue is open.
+  const rightEdge = completed ? 100 : 100 - gap;
   const xs: number[] = [];
   times.forEach((t, i) => {
     xs.push(Math.max(timeX(t), (i === 0 ? 0 : xs[i - 1]) + gap));
+  });
+  // On a long-running issue recent updates sit at the far right, so spreading
+  // them forward would run off the chart. Pull them back to fit instead.
+  xs.forEach((value, i) => {
+    xs[i] = Math.min(value, rightEdge - (xs.length - 1 - i) * gap);
   });
   const x = (t: number) => timeX(t);
   const lastX = xs.length ? xs[xs.length - 1] : 0;
@@ -194,7 +209,8 @@ export function ProgressChart({
                   : { left: `${dueX}%`, paddingLeft: 6 }
               }
             >
-              {overdue ? "Overdue, was due" : "Due"} {formatDay(dayStart(dueDate))}
+              {overdue ? "Overdue, was due" : "Due"}{" "}
+              {formatDay(dayStart(dueDate), withYear)}
             </span>
           )}
         </div>
@@ -202,8 +218,8 @@ export function ProgressChart({
 
       {/* x axis */}
       <div className="mt-2 ml-9 mr-2 flex justify-between font-mono text-[10px] text-ink-400">
-        <span>{formatDay(start)}</span>
-        <span>{formatDay(end - 1)}</span>
+        <span>{formatDay(start, withYear)}</span>
+        <span>{formatDay(end - 1, withYear)}</span>
       </div>
     </div>
   );
