@@ -37,6 +37,8 @@ export function ProgressUpdateForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const value = Number(progress) || 0;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -60,78 +62,95 @@ export function ProgressUpdateForm({
     onAdded();
   };
 
+  const change =
+    value === currentProgress
+      ? "Same as now. The note still goes on the timeline."
+      : `Moves progress from ${currentProgress}% to ${value}%.`;
+
   return (
     <form
       onSubmit={handleSubmit}
-      className="mb-8 grid gap-4 sm:grid-cols-[8rem_1fr]"
+      className="mb-8 rounded-md border border-ink-700 bg-ink-950/60 p-4 sm:p-5"
     >
-      <div>
-        <label
-          htmlFor="updateProgress"
-          className="block text-sm font-medium text-ink-200 mb-2"
-        >
-          Progress (%)
-        </label>
-        <input
-          id="updateProgress"
-          type="number"
-          inputMode="numeric"
-          min={0}
-          max={100}
-          step={1}
-          required
-          value={progress}
-          // Selecting on focus means typing replaces the old value.
-          onFocus={(e) => e.target.select()}
-          onChange={(e) => setProgress(normalizeProgress(e.target.value))}
-          className={inputClasses}
-        />
+      <h3 className="mb-4 font-display text-base font-semibold text-ink-50">
+        Add an update
+      </h3>
+
+      <label
+        htmlFor="updateProgress"
+        className="mb-2 block text-sm font-medium text-ink-200"
+      >
+        New progress
+      </label>
+      <div className="flex items-center gap-4">
         <input
           type="range"
           aria-label="Progress slider"
+          className="tracker-range flex-1"
           min={0}
           max={100}
           step={5}
-          value={Number(progress) || 0}
+          value={value}
+          style={{ "--fill": `${value}%` } as React.CSSProperties}
           onChange={(e) => setProgress(e.target.value)}
-          className="mt-3 w-full accent-gold-400"
         />
+        <div className="relative w-24 shrink-0">
+          <input
+            id="updateProgress"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={100}
+            step={1}
+            required
+            value={progress}
+            // Selecting on focus means typing replaces the old value.
+            onFocus={(e) => e.target.select()}
+            onChange={(e) => setProgress(normalizeProgress(e.target.value))}
+            className={`${inputClasses} pr-8 text-right font-display text-lg [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+          />
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-ink-400">
+            %
+          </span>
+        </div>
       </div>
-      <div>
-        <label
-          htmlFor="updateNote"
-          className="block text-sm font-medium text-ink-200 mb-2"
-        >
-          What happened? *
-        </label>
-        <textarea
-          id="updateNote"
-          required
-          rows={2}
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder="Describe what was done since the last update..."
-          className={`${inputClasses} resize-none`}
-        />
-      </div>
-      <div className="sm:col-span-2 flex flex-wrap items-center gap-4">
-        <Button
-          type="submit"
-          disabled={saving || !note.trim()}
-          className="flex items-center gap-2"
-        >
-          {!saving && <PlusIcon className="w-4 h-4" />}
-          {saving ? "Saving..." : "Add Progress Update"}
-        </Button>
-        <span className="font-mono text-xs text-ink-400">
-          Setting 100% marks the issue completed.
-        </span>
-      </div>
+      <p className="mt-2 text-xs text-ink-300">
+        {change}
+        {value === 100 && " This marks the issue completed."}
+      </p>
+
+      <label
+        htmlFor="updateNote"
+        className="mb-2 mt-5 block text-sm font-medium text-ink-200"
+      >
+        What happened? *
+      </label>
+      <textarea
+        id="updateNote"
+        required
+        rows={3}
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        placeholder="Describe what was done since the last update..."
+        className={`${inputClasses} resize-none`}
+      />
+
       {error && (
-        <div className="sm:col-span-2">
+        <div className="mt-4">
           <ErrorBanner message={error} />
         </div>
       )}
+
+      <div className="mt-4 flex justify-end">
+        <Button
+          type="submit"
+          disabled={saving || !note.trim() || progress === ""}
+          className="flex items-center gap-2"
+        >
+          {!saving && <PlusIcon className="h-4 w-4" />}
+          {saving ? "Saving..." : "Add update"}
+        </Button>
+      </div>
     </form>
   );
 }

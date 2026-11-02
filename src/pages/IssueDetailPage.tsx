@@ -13,6 +13,7 @@ import {
   ProgressTimeline,
   type ProgressUpdate,
 } from "../components/ui/ProgressTimeline";
+import { ProgressChart } from "../components/ui/ProgressChart";
 import { ProgressUpdateForm } from "../components/ProgressUpdateForm";
 import { formatBusinessUnitName, getErrorMessage } from "../lib/format";
 
@@ -353,6 +354,15 @@ export function IssueDetailPage() {
               <ErrorBanner message={updatesError} />
             ) : (
               <>
+                <div className="mb-8">
+                  <ProgressChart
+                    updates={updates}
+                    openDate={issue.open_date}
+                    createdAt={issue.created_at}
+                    dueDate={issue.due_date}
+                    completed={issue.progress === 100}
+                  />
+                </div>
                 <ProgressUpdateForm
                   issueId={issue.id}
                   currentProgress={issue.progress}

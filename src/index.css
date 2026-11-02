@@ -49,6 +49,44 @@ body {
   );
 }
 
+/* Progress slider: gold fill up to --fill, set inline from the value */
+.tracker-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  cursor: pointer;
+  background: linear-gradient(
+    to right,
+    var(--color-gold-400) var(--fill, 0%),
+    var(--color-ink-700) var(--fill, 0%)
+  );
+}
+
+.tracker-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background: var(--color-gold-400);
+  border: 3px solid var(--color-ink-900);
+  box-shadow: 0 0 0 1px var(--color-gold-400);
+}
+
+.tracker-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--color-gold-400);
+  border: 3px solid var(--color-ink-900);
+  box-shadow: 0 0 0 1px var(--color-gold-400);
+}
+
+.tracker-range:focus-visible {
+  outline: 2px solid var(--color-gold-400);
+  outline-offset: 6px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ticker-track {
     animation: none;
